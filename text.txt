@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GOlZAR FURNITURE SHOP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial;
+      margin: 0;
+      background: #111;
+      color: white;
+    }
+
+    header {
+      background: #000;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 15px;
+    }
+
+    .card {
+      background: #1c1c1c;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 5px 0;
+      border-radius: 8px;
+      border: none;
+    }
+
+    input {
+      background: #333;
+      color: white;
+    }
+
+    button {
+      background: #27ae60;
+      color: white;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #444;
+      text-align: center;
+    }
+
+    .income {
+      font-size: 22px;
+      color: #2ecc71;
+      text-align: center;
+    }
+
+    .bill-box {
+      background: white;
+      color: black;
+      padding: 15px;
+      margin-top: 10px;
+    }
+
+    .print-btn {
+      background: orange;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>🪑 GOlZAR FURNITURE SHOP</header>
+
+<div class="container">
+
+<div class="card">
+<h3>Add Product</h3>
+<input id="name" placeholder="Product Name">
+<input id="price" type="number" placeholder="Price">
+<input id="qty" type="number" placeholder="Quantity">
+<button onclick="addProduct()">Add Product</button>
+</div>
+
+<div class="card">
+<h3>Stock</h3>
+<table>
+<thead>
+<tr><th>Name</th><th>Price</th><th>Qty</th></tr>
+</thead>
+<tbody id="stockTable"></tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>Make Bill</h3>
+<input id="sellName" placeholder="Product Name">
+<input id="sellQty" type="number" placeholder="Quantity">
+<button onclick="sellProduct()">Generate Bill</button>
+
+<div id="bill" class="bill-box"></div>
+<button class="print-btn" onclick="printBill()">🖨️ Print Bill</button>
+</div>
+
+<div class="card">
+<h3>Total Monthly Income</h3>
+<div class="income">₹ <span id="income">0</span></div>
+</div>
+
+</div>
+
+<script>
+
+let stock = JSON.parse(localStorage.getItem("stock")) || [];
+let income = parseInt(localStorage.getItem("income")) || 0;
+
+function saveData() {
+  localStorage.setItem("stock", JSON.stringify(stock));
+  localStorage.setItem("income", income);
+}
+
+function addProduct() {
+  let name = nameInput.value;
+  let price = parseInt(priceInput.value);
+  let qty = parseInt(qtyInput.value);
+
+  stock.push({name, price, qty});
+  saveData();
+  displayStock();
+}
+
+function displayStock() {
+  stockTable.innerHTML = "";
+  stock.forEach(p => {
+    stockTable.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>₹ ${p.price}</td>
+        <td>${p.qty}</td>
+      </tr>`;
+  });
+}
+
+function sellProduct() {
+  let name = sellName.value;
+  let qty = parseInt(sellQty.value);
+
+  let product = stock.find(p => p.name === name);
+
+  if(product && product.qty >= qty){
+    product.qty -= qty;
+    let total = product.price * qty;
+    income += total;
+
+    bill.innerHTML = `
+      <h3>GOlZAR FURNITURE SHOP</h3>
+      <hr>
+      Product: ${product.name}<br>
+      Quantity: ${qty}<br>
+      Price: ₹ ${product.price}<br>
+      <hr>
+      <b>Total: ₹ ${total}</b>
+      <br><br>
+      Thank you!
+    `;
+  } else {
+    alert("Product not available");
+  }
+
+  incomeDisplay.innerText = income;
+  saveData();
+  displayStock();
+}
+
+function printBill() {
+  let content = bill.innerHTML;
+  let win = window.open('', '', 'height=600,width=400');
+  win.document.write('<html><body>' + content + '</body></html>');
+  win.document.close();
+  win.print();
+}
+
+incomeDisplay.innerText = income;
+displayStock();
+
+</script>
+
+</body>
+</html>
